@@ -96,7 +96,12 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 		await m_linksDbContext.Links.AddAsync(link);
 		await m_linksDbContext.SaveChangesAsync();
 
-		return Json(link);
+		return Json(new LinkInfo
+		{
+			CreatedAt = link.CreatedAt,
+			Original  = original,
+			Short     = shorted
+		});
 	}
 
 	[Authorize]
