@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text.RegularExpressions;
 using Api.Models;
 using Db;
 using Microsoft.AspNetCore.Authentication;
@@ -14,6 +15,11 @@ namespace Api.Controllers;
 [Produces("application/json")]
 public sealed class UserController(UserDbContext userDbContext, LinksDbContext linksDbContext) : Controller
 {
+	private static readonly Regex s_asciiRegex = new(
+													   "[^ -~]+",
+													   RegexOptions.Compiled | RegexOptions.Singleline
+													  );
+	
 	private readonly UserDbContext  m_userDbContext  = userDbContext;
 	private readonly LinksDbContext m_linksDbContext = linksDbContext;
 
@@ -23,10 +29,7 @@ public sealed class UserController(UserDbContext userDbContext, LinksDbContext l
 	{
 		var id   = User.FindFirstValue(ClaimTypes.Sid);
 		var user = await m_userDbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
-
-		//return Json(new User() { Name = User.Identity!.Name! });
 		var info = new UserInfo { Name = user?.Name ?? string.Empty };
-
 		var links = await m_linksDbContext.Links.AsQueryable()
 										  .Where(link => link.UserId == id)
 										  .Select(
@@ -51,9 +54,12 @@ public sealed class UserController(UserDbContext userDbContext, LinksDbContext l
 
 		if (!data.TryGetValue("name",     out var nameVal)) return BadRequest("bad name");
 		if (!data.TryGetValue("password", out var passwordVal)) return BadRequest("bad password");
-
+		
 		var name     = nameVal.ToString();
 		var password = passwordVal.ToString();
+		
+		if (!s_asciiRegex.IsMatch(name)) return BadRequest("bad name");
+		if (!s_asciiRegex.IsMatch(password)) return BadRequest("bad password");
 
 		var existed = await m_userDbContext.Users.SingleOrDefaultAsync(user => user.Name == name);
 		var id      = existed?.Id ?? Guid.NewGuid().ToString();

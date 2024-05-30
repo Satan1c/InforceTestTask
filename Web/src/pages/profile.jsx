@@ -38,9 +38,9 @@ export default function Profile() {
 						window.location.reload()
 					}} method="post">
 						<label htmlFor="name">Name</label><br/>
-						<input name="name" minLength="3" maxLength="15" required/><br/>
+						<input name="name" minLength="3" maxLength="12" required/><br/>
 						<label htmlFor="password">Password</label><br/>
-						<input type="password" name="password" minLength="4" maxLength="25" required/><br/>
+						<input type="password" name="password" minLength="4" maxLength="15" required/><br/>
 						<button type="submit">Login</button>
 					</form>
 				</ErrorBoundary>
