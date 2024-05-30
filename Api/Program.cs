@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -41,7 +40,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapControllerRoute("default", "{controller=home}/{action=index}");
-
-//app.MapControllerRoute("api_user", "{controller=user}/{*action}");
 
 app.Run();
