@@ -57,7 +57,6 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 	public async Task<IActionResult> Create()
 	{
 		var createForm = await HttpContext.Request.ReadFormAsync();
-
 		if (!createForm.TryGetValue("original", out var originalVal)) return BadRequest("bad original");
 
 		var original = originalVal.ToString().Trim();
@@ -67,7 +66,6 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 		if (shorted != string.Empty && shorted.Length < 3 && !s_urlRegex.IsMatch(shorted)) return BadRequest("bad shorted");
 
 		var userId = User.FindFirst(ClaimTypes.Sid)!.Value;
-
 		var existedLink = await m_linksDbContext.Links.SingleOrDefaultAsync(
 																			l => l.UserId == userId
 																				 && (l.Original == original || l.Short == shorted)
