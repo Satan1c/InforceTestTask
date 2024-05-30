@@ -15,13 +15,10 @@ namespace Api.Controllers;
 [Produces("application/json")]
 public sealed class UserController(UserDbContext userDbContext, LinksDbContext linksDbContext) : Controller
 {
-	private static readonly Regex s_asciiRegex = new(
-													   "[^ -~]+",
-													   RegexOptions.Compiled | RegexOptions.Singleline
-													  );
-	
-	private readonly UserDbContext  m_userDbContext  = userDbContext;
-	private readonly LinksDbContext m_linksDbContext = linksDbContext;
+	private static readonly Regex          s_noAsciiRegex     = new("[^ -~]+", RegexOptions.Compiled | RegexOptions.Singleline);
+	private readonly        LinksDbContext m_linksDbContext = linksDbContext;
+
+	private readonly UserDbContext m_userDbContext = userDbContext;
 
 	[Authorize]
 	[HttpGet("")]
@@ -30,6 +27,7 @@ public sealed class UserController(UserDbContext userDbContext, LinksDbContext l
 		var id   = User.FindFirstValue(ClaimTypes.Sid);
 		var user = await m_userDbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
 		var info = new UserInfo { Name = user?.Name ?? string.Empty };
+
 		var links = await m_linksDbContext.Links.AsQueryable()
 										  .Where(link => link.UserId == id)
 										  .Select(
@@ -54,14 +52,15 @@ public sealed class UserController(UserDbContext userDbContext, LinksDbContext l
 
 		if (!data.TryGetValue("name",     out var nameVal)) return BadRequest("bad name");
 		if (!data.TryGetValue("password", out var passwordVal)) return BadRequest("bad password");
-		
+
 		var name     = nameVal.ToString();
 		var password = passwordVal.ToString();
-		
-		if (!s_asciiRegex.IsMatch(name)) return BadRequest("bad name");
-		if (!s_asciiRegex.IsMatch(password)) return BadRequest("bad password");
+
+		if (s_noAsciiRegex.IsMatch(name)) return BadRequest("bad name");
+		if (s_noAsciiRegex.IsMatch(password)) return BadRequest("bad password");
 
 		var existed = await m_userDbContext.Users.SingleOrDefaultAsync(user => user.Name == name);
+		if (existed is not null && password != existed.Password) return BadRequest("bad password");
 		var id      = existed?.Id ?? Guid.NewGuid().ToString();
 
 		var claims    = new Claim[] { new(ClaimTypes.Sid, id), new(ClaimTypes.Name, password), new(ClaimTypes.Role, "default") };

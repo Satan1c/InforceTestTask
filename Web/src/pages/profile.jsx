@@ -9,18 +9,19 @@ export default function Profile() {
 	if (infoData === undefined) {
 		oldData = undefined;
 		fetch("api/profile")
-			.then(async resp => resp?.redirected ?? true ? undefined : await resp.json())
+			.then(async resp => {
+				return resp.redirected ? undefined : await resp.json()
+			})
 			.then((data) => {
-				if (!data) return
-
-				/*if (data.links.length < 1) {
-					data.links.push({original: "N/A", createdAt: undefined, short: "N/A"})
-				}*/
+				if (!data) {
+					set(() => {})
+					return
+				}
 
 				set(JSON.parse(JSON.stringify(data)))
 
 				if (oldData === undefined) {
-					if (data.links.length < 1) {
+					if (data.links?.length < 1) {
 						data.links.push({original: "N/A", createdAt: undefined, short: "N/A"})
 					}
 					setOld(JSON.parse(JSON.stringify(data)))
@@ -28,14 +29,18 @@ export default function Profile() {
 			})
 	}
 
-	if (!infoData) {
+	if (Object.keys(infoData ?? {}).length === 0) {
 		return (
 			<div className="ProfileApp">
 				<ErrorBoundary fallback={<p>There was an error while submitting the form</p>}>
 					<form action={async (form) => {
-						await fetch("api/profile/login", {method: "POST", body: form})
+						let res = await fetch("api/profile/login", {method: "POST", body: form})
+						if (!res.ok) {
+							alert(await res.json())
+							return
+						}
+						set(() => res)
 						setOld(() => undefined)
-						window.location.reload()
 					}} method="post">
 						<label htmlFor="name">Name</label><br/>
 						<input name="name" minLength="3" maxLength="12" required/><br/>
@@ -47,12 +52,9 @@ export default function Profile() {
 			</div>
 		);
 	}
-	
-	let baseLinks = infoData.links.length > 0 ? infoData.links : [{original: "N/A", createdAt: undefined, short: "N/A"}];
 
-	console.log({l: baseLinks})
-	console.log({l: [{original: "N/A", createdAt: undefined, short: "N/A"}]})
-	console.log({l: infoData.links})
+	let baseLinks = infoData.links.length > 0 ? infoData.links : [{original: "N/A", createdAt: undefined, short: "N/A"}];
+	
 	return (
 		<div className="ProfileApp">
 			<button onClick={async () => {
@@ -63,20 +65,22 @@ export default function Profile() {
 			<ErrorBoundary fallback={<p>There was an error while submitting the form</p>}>
 				<form action={async (form) => {
 					let created = await fetch("api/links/create", {method: "PUT", body: form})
-					if (created.ok) {
-						let links = infoData.links.filter(() => true)
-						links.push(await created.json())
-						infoData.links = links
-						set((d) => ({...d}));
-						setOld(JSON.parse(JSON.stringify(infoData)))
+					if (!created.ok) {
+						alert(await created.json())
+						set(undefined);
 						return;
 					}
-					set(undefined);
+					
+					let links = infoData.links.filter(() => true)
+					links.push(await created.json())
+					infoData.links = links
+					set((d) => ({...d}));
+					setOld(JSON.parse(JSON.stringify(infoData)))
 				}} method="put">
-					<label htmlFor="original">Original</label><br/>
+					<label htmlFor="original">Original (6-50)</label><br/>
 					<input name="original" id="original" minLength="6" maxLength="50" required/><br/>
-					<label htmlFor="shorted">Short</label><br/>
-					<input name="shorted" id="shorted" minLength="6" maxLength="15"/><br/>
+					<label htmlFor="shorted">Short (3-15)</label><br/>
+					<input name="shorted" id="shorted" minLength="3" maxLength="15"/><br/>
 					<button type="submit">Create</button>
 				</form>
 			</ErrorBoundary>
@@ -92,12 +96,11 @@ export default function Profile() {
 				<tbody>
 				{
 					baseLinks.map((l) => {
-						console.log(l)
 						let old = oldData.links.find(x => x.original === l.original);
-						
+
 						const createdAt = l.createdAt !== undefined ? new Date(l.createdAt) : undefined;
-						const date = `${createdAt?.getDate() ?? "N/A"}.${createdAt?.getMonth() ?? "N/A"}.${createdAt?.getFullYear() ?? "N/A"}`;
-						const time = `${createdAt?.getHours() ?? "N/A"}:${createdAt?.getMinutes() ?? "N/A"}`;
+						const date = createdAt ? `${createdAt.getDate()}.${createdAt.getMonth()}.${createdAt.getFullYear()}` : "N/A";
+						const time = createdAt ? `${createdAt.getHours()}:${createdAt.getMinutes()}` : "N/A";
 						return (
 							<tr key={l.original}>
 								<td width="20%">{date} {time}</td>
@@ -117,7 +120,7 @@ export default function Profile() {
 									<button
 										onClick={async () => {
 											if (l.short === old.short) return;
-											await fetch('api/links/update', {
+											let res = await fetch('api/links/update', {
 												method: 'PATCH',
 												body: JSON.stringify({
 													old: old.short,
@@ -125,6 +128,10 @@ export default function Profile() {
 												}),
 												headers: new Headers({'content-type': 'application/json'})
 											})
+											if (!res.ok) {
+												alert(await res.json())
+												return
+											}
 											setOld(JSON.parse(JSON.stringify(infoData)))
 										}}
 										disabled={(old.short === "N/A") || old.short === l.short}>update
@@ -132,13 +139,17 @@ export default function Profile() {
 									<br/>
 									<button
 										onClick={async () => {
-											await fetch('api/links/delete', {
+											let res = await fetch('api/links/delete', {
 												method: 'DELETE',
 												body: JSON.stringify({
 													original: l.original,
 												}),
 												headers: new Headers({'content-type': 'application/json'})
 											})
+											if (!res.ok) {
+												alert(await res.json())
+												return
+											}
 											let links = infoData.links.filter(x => x.original !== l.original)
 											infoData.links = links
 											set((d) => ({...d}));

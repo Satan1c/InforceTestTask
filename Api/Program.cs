@@ -11,8 +11,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 				  {
 					  options.ExpireTimeSpan    = TimeSpan.FromDays(7);
 					  options.SlidingExpiration = true;
-					  options.LoginPath         = "/user/login";
-					  options.LogoutPath        = "/user/logout";
+					  options.LoginPath         = "/profile/login";
+					  options.LogoutPath        = "/profile/logout";
 					  options.Validate();
 				  }
 				 );
@@ -26,7 +26,6 @@ if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/error");
 	app.UseHsts();
-	app.UseHttpsRedirection();
 }
 
 app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = SameSiteMode.Strict, Secure = CookieSecurePolicy.Always });

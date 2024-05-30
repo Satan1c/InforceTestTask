@@ -13,6 +13,10 @@ namespace Api.Controllers;
 [Produces("application/json")]
 public class LinksController(LinksDbContext linksDbContext) : Controller
 {
+	private static readonly Regex s_linkRegex = new(
+													@"(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])",
+													RegexOptions.Compiled | RegexOptions.Singleline
+												   );
 	private static readonly Regex s_urlRegex = new(
 												   @"[^a-zA-Z0-9\:\/?#\[\]@!$&'()\*\+,;=]", RegexOptions.Singleline | RegexOptions.Compiled
 												  );
@@ -52,20 +56,22 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 	public async Task<IActionResult> Create()
 	{
 		var createForm = await HttpContext.Request.ReadFormAsync();
+		
 		if (!createForm.TryGetValue("original", out var originalVal)) return BadRequest("bad original");
+		var original = originalVal.ToString().Trim();
+		if (original.Length < 6 || !s_linkRegex.IsMatch(original)) return BadRequest("bad shorted");
 
-		var shorted = createForm.TryGetValue("shorted", out var shortedVal) ? shortedVal.ToString() : string.Empty;
-		if (shorted != string.Empty && !s_urlRegex.IsMatch(shorted)) return BadRequest("bad shorted");
-
-		var original = originalVal.ToString();
+		var shorted = createForm.TryGetValue("shorted", out var shortedVal) ? shortedVal.ToString().Trim() : string.Empty;
+		if (shorted != string.Empty && shorted.Length < 3 && !s_urlRegex.IsMatch(shorted)) return BadRequest("bad shorted");
+		
 		var userId   = User.FindFirst(ClaimTypes.Sid)!.Value;
-
 		var existedLink = await m_linksDbContext.Links.SingleOrDefaultAsync(
-																	 l => l.UserId == userId
-																		  && (l.Original == original || l.Short == shorted)
-																	);
+																			l => l.UserId == userId
+																				 && (l.Original == original || l.Short == shorted)
+																		   );
 
-		if (existedLink is not null) return Conflict($"link with same {(existedLink.Original == original ? "original" : "shorted")} is already exist");
+		if (existedLink is not null)
+			return Conflict($"link with same {(existedLink.Original == original ? "original" : "shorted")} is already exist");
 
 		string id;
 
@@ -83,9 +89,10 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 			Original  = original,
 			Short     = shorted
 		};
+
 		await m_linksDbContext.Links.AddAsync(link);
 		await m_linksDbContext.SaveChangesAsync();
-		
+
 		return Json(link);
 	}
 
@@ -101,8 +108,8 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 
 		if (!s_urlRegex.IsMatch(updateForm.New)) return BadRequest("bad new");
 
-		var userId = User.FindFirst(ClaimTypes.Sid)!.Value;
-		var existedLink   = await m_linksDbContext.Links.SingleOrDefaultAsync(l => l.UserId == userId && l.Short == updateForm.Old);
+		var userId      = User.FindFirst(ClaimTypes.Sid)!.Value;
+		var existedLink = await m_linksDbContext.Links.SingleOrDefaultAsync(l => l.UserId == userId && l.Short == updateForm.Old);
 
 		if (existedLink is null) return Conflict("link doesn't exist");
 

@@ -1,4 +1,4 @@
-﻿import React, {useEffect} from 'react';
+﻿import React from 'react';
 
 function NoPage() {
 	fetch(`api/links/${window.location.pathname.slice(1)}`)
