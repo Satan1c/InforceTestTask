@@ -15,10 +15,9 @@ namespace Api.Controllers;
 [Produces("application/json")]
 public sealed class UserController(UserDbContext userDbContext, LinksDbContext linksDbContext) : Controller
 {
-	private static readonly Regex          s_noAsciiRegex     = new("[^ -~]+", RegexOptions.Compiled | RegexOptions.Singleline);
+	private static readonly Regex          s_noAsciiRegex   = new("[^ -~]+", RegexOptions.Compiled | RegexOptions.Singleline);
 	private readonly        LinksDbContext m_linksDbContext = linksDbContext;
-
-	private readonly UserDbContext m_userDbContext = userDbContext;
+	private readonly        UserDbContext  m_userDbContext  = userDbContext;
 
 	[Authorize]
 	[HttpGet("")]
@@ -61,7 +60,8 @@ public sealed class UserController(UserDbContext userDbContext, LinksDbContext l
 
 		var existed = await m_userDbContext.Users.SingleOrDefaultAsync(user => user.Name == name);
 		if (existed is not null && password != existed.Password) return BadRequest("bad password");
-		var id      = existed?.Id ?? Guid.NewGuid().ToString();
+
+		var id = existed?.Id ?? Guid.NewGuid().ToString();
 
 		var claims    = new Claim[] { new(ClaimTypes.Sid, id), new(ClaimTypes.Name, password), new(ClaimTypes.Role, "default") };
 		var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));

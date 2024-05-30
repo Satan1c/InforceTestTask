@@ -17,6 +17,7 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 													@"(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])",
 													RegexOptions.Compiled | RegexOptions.Singleline
 												   );
+
 	private static readonly Regex s_urlRegex = new(
 												   @"[^a-zA-Z0-9\:\/?#\[\]@!$&'()\*\+,;=]", RegexOptions.Singleline | RegexOptions.Compiled
 												  );
@@ -56,15 +57,17 @@ public class LinksController(LinksDbContext linksDbContext) : Controller
 	public async Task<IActionResult> Create()
 	{
 		var createForm = await HttpContext.Request.ReadFormAsync();
-		
+
 		if (!createForm.TryGetValue("original", out var originalVal)) return BadRequest("bad original");
+
 		var original = originalVal.ToString().Trim();
 		if (original.Length < 6 || !s_linkRegex.IsMatch(original)) return BadRequest("bad shorted");
 
 		var shorted = createForm.TryGetValue("shorted", out var shortedVal) ? shortedVal.ToString().Trim() : string.Empty;
 		if (shorted != string.Empty && shorted.Length < 3 && !s_urlRegex.IsMatch(shorted)) return BadRequest("bad shorted");
-		
-		var userId   = User.FindFirst(ClaimTypes.Sid)!.Value;
+
+		var userId = User.FindFirst(ClaimTypes.Sid)!.Value;
+
 		var existedLink = await m_linksDbContext.Links.SingleOrDefaultAsync(
 																			l => l.UserId == userId
 																				 && (l.Original == original || l.Short == shorted)

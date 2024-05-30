@@ -14,7 +14,8 @@ export default function Profile() {
 			})
 			.then((data) => {
 				if (!data) {
-					set(() => {})
+					set(() => {
+					})
 					return
 				}
 
@@ -54,7 +55,7 @@ export default function Profile() {
 	}
 
 	let baseLinks = infoData.links.length > 0 ? infoData.links : [{original: "N/A", createdAt: undefined, short: "N/A"}];
-	
+
 	return (
 		<div className="ProfileApp">
 			<button onClick={async () => {
@@ -70,7 +71,7 @@ export default function Profile() {
 						set(undefined);
 						return;
 					}
-					
+
 					let links = infoData.links.filter(() => true)
 					links.push(await created.json())
 					infoData.links = links
