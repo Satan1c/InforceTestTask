@@ -1,0 +1,12 @@
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\bin\Debug\net8.0\LinksDb.deps.json
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\bin\Debug\net8.0\LinksDb.dll
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\bin\Debug\net8.0\LinksDb.pdb
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\LinksDb.csproj.AssemblyReference.cache
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\LinksDb.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\LinksDb.AssemblyInfoInputs.cache
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\LinksDb.AssemblyInfo.cs
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\LinksDb.csproj.CoreCompileInputs.cache
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\LinksDb.dll
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\refint\LinksDb.dll
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\LinksDb.pdb
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\LinksDb\obj\Debug\net8.0\ref\LinksDb.dll

@@ -1,0 +1,6 @@
+﻿@Api = http://localhost:5251
+
+GET {{Api}}/user/info
+Accept: application/json
+
+###
