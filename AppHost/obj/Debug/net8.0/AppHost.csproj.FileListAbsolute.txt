@@ -148,3 +148,4 @@ C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\AppHost
 C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\AppHost\obj\Debug\net8.0\AppHost.pdb
 C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\AppHost\obj\Debug\net8.0\AppHost.genruntimeconfig.cache
 C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\AppHost\obj\Debug\net8.0\ref\AppHost.dll
+C:\Users\Satan1c\OneDrive\Documents\Development\projects\InforceTestTask\AppHost\obj\Debug\net8.0\AppHost.sourcelink.json
